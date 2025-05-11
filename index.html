@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Animation Demo</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background: #f5f7fa;
+            transition: background 0.5s ease;
+        }
+
+        /* Animated Button */
+        .action-btn {
+            padding: 12px 24px;
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: #3a5ce9;
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Animation Target */
+        .animated-box {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #4a6cf7, #6a11cb);
+            margin: 2rem auto;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            transition: all 0.4s ease;
+        }
+
+        /* Animation Classes */
+        .spin {
+            animation: spin 1s ease;
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        .color-change {
+            animation: colorChange 2s alternate infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes colorChange {
+            0% { background: linear-gradient(135deg, #4a6cf7, #6a11cb); }
+            100% { background: linear-gradient(135deg, #ff758c, #ff7eb3); }
+        }
+
+        /* Preferences Panel */
+        .prefs-panel {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            width: 300px;
+        }
+
+        select, label {
+            display: block;
+            margin: 0.5rem 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Animation Demo</h1>
+    
+    <div class="animated-box" id="animationTarget">Hello!</div>
+    
+    <button class="action-btn" id="triggerBtn">Trigger Animation</button>
+    
+    <div class="prefs-panel">
+        <h3>Your Preferences</h3>
+        <label for="animationSelect">Preferred Animation:</label>
+        <select id="animationSelect">
+            <option value="spin">Spin</option>
+            <option value="pulse">Pulse</option>
+            <option value="color-change">Color Change</option>
+        </select>
+        
+        <label for="darkMode">Dark Mode:</label>
+        <select id="darkMode">
+            <option value="false">Off</option>
+            <option value="true">On</option>
+        </select>
+    </div>
+
+    <script>
+        // DOM Elements
+        const animationTarget = document.getElementById('animationTarget');
+        const triggerBtn = document.getElementById('triggerBtn');
+        const animationSelect = document.getElementById('animationSelect');
+        const darkModeSelect = document.getElementById('darkMode');
+
+        // Load saved preferences
+        function loadPreferences() {
+            const savedAnimation = localStorage.getItem('preferredAnimation') || 'spin';
+            const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+            
+            animationSelect.value = savedAnimation;
+            darkModeSelect.value = savedDarkMode;
+            document.body.classList.toggle('dark-mode', savedDarkMode);
+        }
+
+        // Save preferences
+        function savePreferences() {
+            localStorage.setItem('preferredAnimation', animationSelect.value);
+            localStorage.setItem('darkMode', darkModeSelect.value);
+            
+            // Apply dark mode immediately if selected
+            document.body.classList.toggle('dark-mode', darkModeSelect.value === 'true');
+        }
+
+        // Trigger animation based on preference
+        function triggerAnimation() {
+            // Reset any existing animations
+            animationTarget.classList.remove('spin', 'pulse', 'color-change');
+            
+            // Force reflow to reset animation
+            void animationTarget.offsetWidth;
+            
+            // Add selected animation class
+            const selectedAnimation = localStorage.getItem('preferredAnimation') || 'spin';
+            animationTarget.classList.add(selectedAnimation);
+        }
+
+        // Initialize
+        loadPreferences();
+
+        // Event Listeners
+        triggerBtn.addEventListener('click', triggerAnimation);
+        animationSelect.addEventListener('change', savePreferences);
+        darkModeSelect.addEventListener('change', savePreferences);
+
+        // Bonus: Auto-save preferences when changed
+        [animationSelect, darkModeSelect].forEach(el => {
+            el.addEventListener('change', () => {
+                savePreferences();
+                // Provide visual feedback
+                animationTarget.textContent = 'Preferences Saved!';
+                setTimeout(() => {
+                    animationTarget.textContent = 'Hello!';
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>
